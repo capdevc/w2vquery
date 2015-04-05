@@ -16,29 +16,38 @@
  */
 package com.pyaanalytics
 
-import org.apache.spark.mllib.feature.Word2Vec
+import org.apache.spark.mllib.feature._
 import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.SparkConf
 import org.apache.spark.rdd.RDD
 
 import scopt.OptionParser
-import java.io.{ObjectOutputStream, FileOutputStream}
+import java.io.{ObjectInputStream, FileInputStream}
 import scala.io.Source
 import scala.xml._
 
 object W2VQuery {
 
-  case class W2VQueryConfig(abstractsFile: String = "",
-                              modelFile: String = "",
-                              sparkMaster: String = "local[64]")
+  case class W2VQueryConfig(queryString: String = "",
+                            modelFile: String = "",
+                            sparkMaster: String = "local[64]")
+
+  class ModelLoader(
+    fileInputStream: FileInputStream
+  ) extends ObjectInputStream(fileInputStream) {
+    override def resolveClass(desc: java.io.ObjectStreamClass): Class[_] = {
+      try { Class.forName(desc.getName, false, getClass.getClassLoader) }
+      catch { case ex: ClassNotFoundException => super.resolveClass(desc) }
+    }
+  }
 
   def main(args: Array[String]): Unit = {
 
     val parser = new OptionParser[W2VQueryConfig]("W2VQuery") {
 
-      arg[String]("abstractsFile") valueName("abstractsFile") action {
-        (x, c) => c.copy(abstractsFile = x)
+      arg[String]("queryString") valueName("queryString") action {
+        (x, c) => c.copy(queryString = x)
       }
 
 
@@ -68,18 +77,11 @@ object W2VQuery {
 
     val sc = new SparkContext(sparkConf)
 
-    val lines = sc.textFile(config.abstractsFile)
-      .map(_.split("\\s+").toSeq)
+    val iStream = new ObjectInputStream(new FileInputStream(config.modelFile))
+    val modelLoader = new ModelLoader(new FileInputStream(config.modelFile))
+    val w2vModel = iStream.readObject().asInstanceOf[Word2VecModel]
 
-    val w2v = new Word2Vec()
-      .setVectorSize(800)
-
-    val w2vModel = w2v.fit(lines)
-
-    val oStream = new ObjectOutputStream(new FileOutputStream(config.modelFile))
-    oStream.writeObject(w2vModel)
-
-    val synonyms = w2vModel.findSynonyms("patient", 20)
+    val synonyms = w2vModel.findSynonyms(config.queryString, 20)
 
     synonyms map {x => println(x.toString)}
 
