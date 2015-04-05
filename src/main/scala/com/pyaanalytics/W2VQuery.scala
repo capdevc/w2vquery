@@ -24,8 +24,7 @@ import java.io.{ObjectInputStream, FileInputStream}
 object W2VQuery {
 
   case class W2VQueryConfig(queryString: String = "",
-                            modelFile: String = "",
-                            sparkMaster: String = "local[64]")
+                            modelFile: String = "")
 
   def main(args: Array[String]): Unit = {
 
@@ -38,10 +37,6 @@ object W2VQuery {
 
       arg[String]("modelFile") valueName("modelFile") action {
         (x, c) => c.copy(modelFile = x)
-      }
-
-      arg[String]("sparkMaster") valueName("sparkMaster") action {
-        (x, c) => c.copy(sparkMaster = x)
       }
     }
 
