@@ -27,15 +27,15 @@ import java.io.{ObjectOutputStream, FileOutputStream}
 import scala.io.Source
 import scala.xml._
 
-object PMWord2Vec {
+object W2VQuery {
 
-  case class PMWord2VecConfig(abstractsFile: String = "",
+  case class W2VQueryConfig(abstractsFile: String = "",
                               modelFile: String = "",
                               sparkMaster: String = "local[64]")
 
   def main(args: Array[String]): Unit = {
 
-    val parser = new OptionParser[PMWord2VecConfig]("PMWord2Vec") {
+    val parser = new OptionParser[W2VQueryConfig]("W2VQuery") {
 
       arg[String]("abstractsFile") valueName("abstractsFile") action {
         (x, c) => c.copy(abstractsFile = x)
@@ -51,7 +51,7 @@ object PMWord2Vec {
       }
     }
 
-    parser.parse(args, PMWord2VecConfig()) match {
+    parser.parse(args, W2VQueryConfig()) match {
       case Some(config) => {
         run(config)
       } case None => {
@@ -60,9 +60,9 @@ object PMWord2Vec {
     }
   }
 
-  def run(config: PMWord2VecConfig): Unit = {
+  def run(config: W2VQueryConfig): Unit = {
     val sparkConf = new SparkConf()
-      .setAppName("PMWord2Vec")
+      .setAppName("W2VQuery")
       .setMaster(config.sparkMaster)
       .set("spark.executor.memory", "10g")
 
