@@ -70,12 +70,12 @@ object W2VQuery {
   }
 
   def run(config: W2VQueryConfig): Unit = {
-    val sparkConf = new SparkConf()
-      .setAppName("W2VQuery")
-      .setMaster(config.sparkMaster)
-      .set("spark.executor.memory", "10g")
+    // val sparkConf = new SparkConf()
+    //   .setAppName("W2VQuery")
+    //   .setMaster(config.sparkMaster)
+    //   .set("spark.executor.memory", "10g")
 
-    val sc = new SparkContext(sparkConf)
+    // val sc = new SparkContext(sparkConf)
 
     val iStream = new ObjectInputStream(new FileInputStream(config.modelFile))
     val modelLoader = new ModelLoader(new FileInputStream(config.modelFile))
@@ -85,6 +85,6 @@ object W2VQuery {
 
     synonyms map {x => println(x.toString)}
 
-    sc.stop()
+    // sc.stop()
   }
 }
